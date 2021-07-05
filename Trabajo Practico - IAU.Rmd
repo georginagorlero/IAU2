@@ -31,9 +31,44 @@ Vamos a ver que información traen nuestros datos
 ```{r}
 colnames(recorridos_2019)
 ```
+
 Podemos ver también qué tipo de datos tiene cada una de las columnas
 
 ```{r}
 str(recorridos_2019)
 ```
+```{r}
+summary(recorridos_2019)
+```
 
+Para una primera aproximación voy a ver solamente las estaciones destino, ver cuales son las 10 estaciones más recurrentes como destino final en el 2019 y en el 2020.
+
+Para esto primero me quedo sólo con las columnas que me interesan que son aquellas que tienen que ver con el destino de los recorridos. Además, saco todas aquellas observaciones que no tienen latitud (y por ende tampoco longitud)
+
+```{r}
+resumen_destinos2019 <- recorridos_2019 %>% 
+                    select(fecha_destino_recorrido, nombre_estacion_destino,domicilio_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
+                    filter(!is.na(lat_estacion_destino))
+```
+
+```{r}
+resumen_destinos2020 <- recorridos_2020 %>% 
+                    select(fecha_destino_recorrido, nombre_estacion_destino,direccion_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
+                    filter(!is.na(lat_estacion_destino))
+```
+
+```{r}
+destinos_2019 <- resumen_destinos2019 %>%
+              group_by(nombre_estacion_destino) %>%
+              summarize(cantidad=n()) %>%
+              arrange(desc(cantidad))
+head(destinos_2019)
+```
+
+```{r}
+destinos_2020 <- resumen_destinos2020 %>%
+              group_by(nombre_estacion_destino) %>%
+              summarize(cantidad=n()) %>%
+              arrange(desc(cantidad))
+head(destinos_2020)
+```
