@@ -7,7 +7,7 @@ output: html_document
 
 En este trabajo voy a analizar las modificaciones en el uso de las bicicletas "Ecobici" del Gobierno de la Ciudad de Buenos Aires durante la pandemia por Covid-19 en el micro y macrocentro porteño.
 
-## 1. Primer paso - Carga de datasets
+## 1. Primer paso - Cargar los datasets.
 
 ```{r}
 library(dplyr)
@@ -15,4 +15,12 @@ library(tidyverse)
 library(sf)
 ```
 
+```{r}
+recorridos_2019 <- read.csv("data/recorridos-realizados-2019.csv")
+recorridos_2020 <- read.csv("data/recorridos-realizados-2020.csv")
+```
+```{r}
+barrios <- st_read("data/barrios_badata.shp")
+```
 
+## 2. Segundo paso - Ordenar y procesar los datos.
