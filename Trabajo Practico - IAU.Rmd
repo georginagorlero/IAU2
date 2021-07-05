@@ -13,14 +13,27 @@ En este trabajo voy a analizar las modificaciones en el uso de las bicicletas "E
 library(dplyr)
 library(tidyverse)
 library(sf)
+library(lubridate)
 ```
 
 ```{r}
-recorridos_2019 <- read.csv("data/recorridos-realizados-2019.csv")
-recorridos_2020 <- read.csv("data/recorridos-realizados-2020.csv")
+recorridos_2019 <- read.csv("data/recorridos-realizados-2019.csv", stringsAsFactors = TRUE)
+recorridos_2020 <- read.csv("data/recorridos-realizados-2020.csv", stringsAsFactors = TRUE)
 ```
 ```{r}
 barrios <- st_read("data/barrios_badata.shp")
 ```
 
 ## 2. Segundo paso - Ordenar y procesar los datos.
+
+Vamos a ver que información traen nuestros datos
+
+```{r}
+colnames(recorridos_2019)
+```
+Podemos ver también qué tipo de datos tiene cada una de las columnas
+
+```{r}
+str(recorridos_2019)
+```
+
