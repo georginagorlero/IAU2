@@ -17,9 +17,10 @@ library(lubridate)
 ```
 
 ```{r}
-recorridos_2019 <- read.csv("data/recorridos-realizados-2019.csv", stringsAsFactors = TRUE)
-recorridos_2020 <- read.csv("data/recorridos-realizados-2020.csv", stringsAsFactors = TRUE)
+recorridos_2019 <- read.csv("data/recorridos-realizados-2019.csv", encoding = "UTF-8")
+recorridos_2020 <- read.csv("data/recorridos-realizados-2020.csv", encoding = "UTF-8")
 ```
+
 ```{r}
 barrios <- st_read("data/barrios_badata.shp")
 ```
@@ -47,7 +48,7 @@ Para esto primero me quedo sólo con las columnas que me interesan que son aquel
 
 ```{r}
 resumen_destinos2019 <- recorridos_2019 %>% 
-                    select(fecha_destino_recorrido, nombre_estacion_destino,domicilio_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
+                    select(fecha_destino_recorrido, id_estacion_destino, nombre_estacion_destino,domicilio_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
                     filter(!is.na(lat_estacion_destino))
 ```
 
@@ -59,11 +60,14 @@ resumen_destinos2020 <- recorridos_2020 %>%
 
 ```{r}
 destinos_2019 <- resumen_destinos2019 %>%
+              mutate(nombre_estacion_destino = paste(id_estacion_destino,nombre_estacion_destino,sep="-"))%>%
               group_by(nombre_estacion_destino) %>%
               summarize(cantidad=n()) %>%
               arrange(desc(cantidad))
-head(destinos_2019)
 ```
+
+
+
 
 ```{r}
 destinos_2020 <- resumen_destinos2020 %>%
