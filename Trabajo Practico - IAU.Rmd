@@ -13,12 +13,13 @@ En este trabajo voy a analizar las modificaciones en el uso de las bicicletas "E
 library(dplyr)
 library(tidyverse)
 library(sf)
+library(vroom)
 library(lubridate)
 ```
 
 ```{r}
-recorridos_2019 <- read.csv("data/recorridos-realizados-2019.csv", encoding = "UTF-8")
-recorridos_2020 <- read.csv("data/recorridos-realizados-2020.csv", encoding = "UTF-8")
+recorridos_2019 <- vroom("data/recorridos-realizados-2019.csv")
+recorridos_2020 <- vroom("data/recorridos-realizados-2020.csv")
 ```
 
 ```{r}
