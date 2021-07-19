@@ -40,10 +40,11 @@ colnames(recorridos_2020)
 Cuando comparamos las columnas de los datos de 2019 y 2020 vemos que son prácticamente las mismas. Podemos observar que en el dataset de 2020 ya no viene la columna genero_usuario y que las columnas domicilio pasaron a denominarse dirección. Vamos a modificarlas para que tengan el mismo nombre
 
 ```{r}
-recorridos_2019 <- rename(recorridos_2019, direccion_estacion_origen = domicilio_estacion_origen, direccion_estacion_destino = domicilio_estacion_destino )
+recorridos_2019 <- rename(recorridos_2019, direccion_estacion_origen = domicilio_estacion_origen, direccion_estacion_destino = domicilio_estacion_destino ) %>% 
+                   select(-genero_usuario)
 ```
 
-Ya unificamos los nombres de todas las columnas en ambos datasets
+Ya unificamos los nombres de todas las columnas en ambos datasets y eliminamos la columna género. 
 
 Podemos ver también qué tipo de datos tiene cada una de las columnas
 
