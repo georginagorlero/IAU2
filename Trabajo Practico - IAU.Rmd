@@ -46,6 +46,28 @@ recorridos_2019 <- rename(recorridos_2019, direccion_estacion_origen = domicilio
 
 Ya unificamos los nombres de todas las columnas en ambos datasets y eliminamos la columna género. 
 
+Como nuestros datasets son muy grandes, vamos a quedarnos sólo con los recorridos de  marzo, abril y mayo de cada uno de los años. 
+
+```{r}
+recorridos_2019_fma <- recorridos_2019 %>%
+                   mutate(mes=month(fecha_destino_recorrido, label=TRUE, abbr=TRUE, locale="Spanish"))%>%
+                   filter(mes %in% c("mar","abr","may"))
+                  
+```
+
+Pasamos de tener más de 6 millones de observaciones a tener 981 mil, un número mucho más manejable
+
+Hacemos lo mismo con el dataset de 2020
+
+```{r}
+recorridos_2020_fma <- recorridos_2020 %>%
+                   mutate(mes=month(fecha_destino_recorrido, label=TRUE, abbr=TRUE, locale="Spanish"))%>%
+                   filter(mes %in% c("mar","abr","may"))
+                  
+```
+
+Ya nos podemos ir anticipando del impacto que causó el covid en el uso de las Ecobicis viendo que el resultado de filtrar nuestro dataset da 73mil observaciones, un número muy menor al que nos da en 2019
+
 Podemos ver también qué tipo de datos tiene cada una de las columnas
 
 ```{r}
