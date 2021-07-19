@@ -49,7 +49,7 @@ Ya unificamos los nombres de todas las columnas en ambos datasets y eliminamos l
 Como nuestros datasets son muy grandes, vamos a quedarnos sólo con los recorridos de  marzo, abril y mayo de cada uno de los años. 
 
 ```{r}
-recorridos_2019_fma <- recorridos_2019 %>%
+recorridos_2019_mam <- recorridos_2019 %>%
                    mutate(mes=month(fecha_destino_recorrido, label=TRUE, abbr=TRUE, locale="Spanish"))%>%
                    filter(mes %in% c("mar","abr","may"))
                   
@@ -60,7 +60,7 @@ Pasamos de tener más de 6 millones de observaciones a tener 981 mil, un número
 Hacemos lo mismo con el dataset de 2020
 
 ```{r}
-recorridos_2020_fma <- recorridos_2020 %>%
+recorridos_2020_mam <- recorridos_2020 %>%
                    mutate(mes=month(fecha_destino_recorrido, label=TRUE, abbr=TRUE, locale="Spanish"))%>%
                    filter(mes %in% c("mar","abr","may"))
                   
@@ -71,10 +71,10 @@ Ya nos podemos ir anticipando del impacto que causó el covid en el uso de las E
 Podemos ver también qué tipo de datos tiene cada una de las columnas
 
 ```{r}
-str(recorridos_2019)
+str(recorridos_2019_mam)
 ```
 ```{r}
-summary(recorridos_2019)
+summary(recorridos_2019_mam)
 ```
 
 Para una primera aproximación voy a ver solamente las estaciones destino, ver cuales son las 10 estaciones más recurrentes como destino final en el 2019 y en el 2020.
@@ -82,26 +82,24 @@ Para una primera aproximación voy a ver solamente las estaciones destino, ver c
 Para esto primero me quedo sólo con las columnas que me interesan que son aquellas que tienen que ver con el destino de los recorridos. Además, saco todas aquellas observaciones que no tienen latitud (y por ende tampoco longitud)
 
 ```{r}
-resumen_destinos2019 <- recorridos_2019 %>% 
-                    select(fecha_destino_recorrido, id_estacion_destino, nombre_estacion_destino,domicilio_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
+resumen_destinos2019 <- recorridos_2019_mam %>% 
+                    select(fecha_destino_recorrido, id_estacion_destino, nombre_estacion_destino,direccion_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
                     filter(!is.na(lat_estacion_destino))
 ```
 
 ```{r}
-resumen_destinos2020 <- recorridos_2020 %>% 
+resumen_destinos2020 <- recorridos_2020_mam %>% 
                     select(fecha_destino_recorrido, nombre_estacion_destino,direccion_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
                     filter(!is.na(lat_estacion_destino))
 ```
 
 ```{r}
 destinos_2019 <- resumen_destinos2019 %>%
-              mutate(nombre_estacion_destino = paste(id_estacion_destino,nombre_estacion_destino,sep="-"))%>%
+              mutate(nombre_estacion_destino = paste(id_estacion_destino,nombre_estacion_destino,sep=" - "))%>%
               group_by(nombre_estacion_destino) %>%
               summarize(cantidad=n()) %>%
               arrange(desc(cantidad))
 ```
-
-
 
 
 ```{r}
