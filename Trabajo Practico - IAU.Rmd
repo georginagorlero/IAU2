@@ -23,8 +23,8 @@ library(skimr)
 Vamos a cargar los datasets que ya trabajamos previamente en el RScript "Pruebas TP1". Nos quedamos solamente con las observaciones de la segunda quincena de junio de 2019 y la de 2020 para tener una cantidad de datos manejable. 
 
 ```{r}
-recorridos_2019 <- vroom("data/recorridos_2019_jun15_30")
-recorridos_2020 <- vroom("data/recorridos_2020_jun15_30")
+recorridos_2019 <- read.csv("data/recorridos_2019_jun15_30")
+recorridos_2020 <- read.csv("data/recorridos_2020_jun15_30")
 ```
 También cargamos la base de datos de los barrios de la Ciudad Autónoma de Buenos Aires. 
 
@@ -71,9 +71,40 @@ recorridos_2019 <- recorridos_2019 %>%
 
 skim(recorridos_2019)
 ```
-Ahora que 
+Ahora que ya no tengo valores nulos voy a realizar una primera aproximación a los datos. Voy a ver solamente las estaciones destino, ver cuáles son los valores únicos de 2019 y cuáles de 2020.
 
-Para una primera aproximación voy a ver solamente las estaciones destino, ver cuales son las 10 estaciones más recurrentes como destino final en el 2019 y en el 2020.
+```{r}
+destinos_2019 <- recorridos_2019 %>% 
+                 group_by(nombre_estacion_destino) %>% 
+                 summarise(cantidad=n())
+destinos_2019
+```
+
+Podemos ver que en el caso de 2019 la base tiene valores con acento que no se identifican bien, también que hay nombres con mayúsculas y otros con proper case. Vamos a pasar todos a un mismo formato para que no haya duplicados por falta de consistencia en los datos. Vamos a usar también la funcion Encoding<- para poder visualizar bien las tildes y cambiarlas por valores sin las mismas. 
+
+```{r}
+recorridos_2019$nombre_estacion_destino <- recorridos_2019$nombre_estacion_destino %>%
+  str_to_title() %>% 
+  str_replace_all(c("á"="a","é"="e", "í"="i", "ó"="o", "ú"="u"))
+
+
+
+recorridos_2019$nombre_estacion_origen <- recorridos_2019$nombre_estacion_origen %>%
+  str_to_title() %>% 
+  str_replace_all(c("á"="a","é"="e", "í"="i", "ó"="o", "ú"="u"))
+
+
+#Volvemos a corroborar las estaciones destino
+destinos_2019 <- recorridos_2019 %>% 
+                 group_by(nombre_estacion_destino) %>% 
+                 summarise(cantidad=n())
+destinos_2019
+```
+
+Ahora vemos que los datos están más prolijos. Vemos que en junio de 2019 la estación más utilizada como destino de las 385 fue la de Constitución con 4066 recorridos finalizados en sólo la segunda quincena de junio.
+
+
+
 
 Para esto primero me quedo sólo con las columnas que me interesan que son aquellas que tienen que ver con el destino de los recorridos. Además, saco todas aquellas observaciones que no tienen latitud (y por ende tampoco longitud)
 
