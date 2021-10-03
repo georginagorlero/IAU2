@@ -12,15 +12,21 @@ En este trabajo voy a analizar las modificaciones en el uso de las bicicletas "E
 ```{r}
 library(dplyr)
 library(tidyverse)
+library(janitor)
+library(stringr)
 library(sf)
 library(vroom)
 library(lubridate)
+library(skimr)
 ```
 
+Vamos a cargar los datasets que ya trabajamos previamente en el RScript "Pruebas TP1". Nos quedamos solamente con las observaciones de la segunda quincena de junio de 2019 y la de 2020 para tener una cantidad de datos manejable. 
+
 ```{r}
-recorridos_2019 <- vroom("data/recorridos-realizados-2019.csv")
-recorridos_2020 <- vroom("data/recorridos-realizados-2020.csv")
+recorridos_2019 <- vroom("data/recorridos_2019_jun15_30")
+recorridos_2020 <- vroom("data/recorridos_2020_jun15_30")
 ```
+También cargamos la base de datos de los barrios de la Ciudad Autónoma de Buenos Aires. 
 
 ```{r}
 barrios <- st_read("data/barrios_badata.shp")
@@ -37,45 +43,35 @@ colnames(recorridos_2019)
 ```{r}
 colnames(recorridos_2020)
 ```
-Cuando comparamos las columnas de los datos de 2019 y 2020 vemos que son prácticamente las mismas. Podemos observar que en el dataset de 2020 ya no viene la columna genero_usuario y que las columnas domicilio pasaron a denominarse dirección. Vamos a modificarlas para que tengan el mismo nombre
+Cuando comparamos las columnas de los datos de 2019 y 2020 vemos que son prácticamente las mismas. Podemos observar que en el dataset de 2020 las columnas domicilio pasaron a denominarse dirección. Vamos a modificarlas para que tengan el mismo nombre
 
 ```{r}
-recorridos_2019 <- rename(recorridos_2019, direccion_estacion_origen = domicilio_estacion_origen, direccion_estacion_destino = domicilio_estacion_destino ) %>% 
-                   select(-genero_usuario)
+recorridos_2019 <- rename(recorridos_2019, 
+                      direccion_estacion_origen = domicilio_estacion_origen,
+                      direccion_estacion_destino = domicilio_estacion_destino)
 ```
 
-Ya unificamos los nombres de todas las columnas en ambos datasets y eliminamos la columna género. 
-
-Como nuestros datasets son muy grandes, vamos a quedarnos sólo con los recorridos de  marzo, abril y mayo de cada uno de los años. 
+Ya unificamos los nombres de todas las columnas en ambos datasets. Ahora podemos ver qué datos tienen nuestros datasets. 
 
 ```{r}
-recorridos_2019_mam <- recorridos_2019 %>%
-                   mutate(mes=month(fecha_destino_recorrido, label=TRUE, abbr=TRUE, locale="Spanish"))%>%
-                   filter(mes %in% c("mar","abr","may"))
-                  
-```
-
-Pasamos de tener más de 6 millones de observaciones a tener 981 mil, un número mucho más manejable
-
-Hacemos lo mismo con el dataset de 2020
-
-```{r}
-recorridos_2020_mam <- recorridos_2020 %>%
-                   mutate(mes=month(fecha_destino_recorrido, label=TRUE, abbr=TRUE, locale="Spanish"))%>%
-                   filter(mes %in% c("mar","abr","may"))
-                  
-```
-
-Ya nos podemos ir anticipando del impacto que causó el covid en el uso de las Ecobicis viendo que el resultado de filtrar nuestro dataset da 73mil observaciones, un número muy menor al que nos da en 2019
-
-Podemos ver también qué tipo de datos tiene cada una de las columnas
-
-```{r}
-str(recorridos_2019_mam)
+skim(recorridos_2019)
 ```
 ```{r}
-summary(recorridos_2019_mam)
+skim(recorridos_2020)
 ```
+Ya nos podemos ir anticipando del impacto que causó el covid en el uso de las Ecobicis viendo que la cantidad de observaciones del 2020 en relación al 2019 (41674 vs 389585)
+
+Podemos ver también qué tipo de datos tiene cada una de las columnas y la cantidad de valores missing o nulos que hay. Vemos que la base de 2020 no tiene valores missing mientras que la de 2019 tiene una gran cantidad.
+
+Vamos, entonces,a limpiar los valores nulos. Teniendo en cuenta que lo que más nos interesa es tener las direcciones y las coordenadas de las estaciones de origen y destino en todos los casos y que casi la totalidad de los datos que faltan son de estas variables, utilizamos el método drop_na() para realizar este procedimiento.  
+
+```{r}
+recorridos_2019 <- recorridos_2019 %>% 
+                   drop_na()
+
+skim(recorridos_2019)
+```
+Ahora que 
 
 Para una primera aproximación voy a ver solamente las estaciones destino, ver cuales son las 10 estaciones más recurrentes como destino final en el 2019 y en el 2020.
 
