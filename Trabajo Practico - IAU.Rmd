@@ -1,9 +1,11 @@
 ---
-title: "Trabajo Práctico - IAU2"
+title: "Trabajo Práctico 1 & 3 - IAU2"
 output: html_document
 ---
 
-# Trabajo Práctico - Instrumentos de Análisis Urbano 2
+# Instrumentos de Análisis Urbano 2 - Trabajo Práctico n°1
+
+**Alumna:** Georgina Gorlero
 
 En este trabajo voy a analizar las modificaciones en el uso de las bicicletas "Ecobici" del Gobierno de la Ciudad de Buenos Aires durante la pandemia por Covid-19 en el micro y macrocentro porteño.
 
@@ -18,6 +20,7 @@ library(sf)
 library(vroom)
 library(lubridate)
 library(skimr)
+library(ggmap)
 ```
 
 Vamos a cargar los datasets que ya trabajamos previamente en el RScript "Pruebas TP1". Nos quedamos solamente con las observaciones de la segunda quincena de junio de 2019 y la de 2020 para tener una cantidad de datos manejable. 
@@ -28,9 +31,6 @@ recorridos_2020 <- read.csv("data/recorridos_2020_jun15_30")
 ```
 También cargamos la base de datos de los barrios de la Ciudad Autónoma de Buenos Aires. 
 
-```{r}
-barrios <- st_read("data/barrios_badata.shp")
-```
 
 ## 2. Segundo paso - Ordenar y procesar los datos.
 
@@ -136,6 +136,7 @@ recorridos_2020$nombre_estacion_origen <- recorridos_2020$nombre_estacion_origen
   str_to_title() %>% 
   str_replace_all(c("á"="a","é"="e", "í"="i", "ó"="o", "ú"="u"))
 ```
+
 ```{r}
 #Volvemos a corroborar las estaciones destino e incorporamos las de origen
 
@@ -164,15 +165,117 @@ recorridos_2020 <- recorridos_2020 %>%
   
 ```
 
-Ahora que normalizamos los nombres de las estaciones, vamos a unificar nuestras dos bases para tener una sola.
+Ahora que normalizamos los nombres de las estaciones, vamos a unificar nuestras dos bases para tener una sola. Como ultimo paso, como vimos que las coordenadas no tienen cantidad uniforme de decimales, vamos a normalizar eso también
 
 
 ```{r}
 
 recorridos_2019_2020 <- rbind(recorridos_2019,recorridos_2020) %>% 
-                        mutate(year=year(fecha_origen_recorrido))
+                        mutate(year=year(fecha_origen_recorrido),                                               long_estacion_origen=round(long_estacion_origen,5),
+                        lat_estacion_origen=round(lat_estacion_origen,5),
+                        long_estacion_destino=round(long_estacion_destino,5),
+                        lat_estacion_destino=round(lat_estacion_destino,5))
   
 ```
 
 Ya tenemos nuestra base lista para trabajar. 
+
+
+# Instrumentos de Análisis Urbano 2 - Trabajo Práctico n°3
+
+En este trabajo práctico vamos a visualizar los recorridos de Ecobici en la segunda quincena de junio de 2019 y 2020. Trataremos de entender el impacto del Covid-19 en el uso de las bicicletas públicas de la Ciudad.
+
+
+```{r}
+
+barrios_CABA <- st_read("data/barrios_badata.shp")
+comunas_CABA <- read_sf("data/CABA_comunas.geojson")
+```
+
+Primero mapeamos las estaciones de origen y las de destino y hacemos un facet por año para identificar cambios de estaciones
+
+
+```{r}
+estaciones_origen_un <- recorridos_2019_2020 %>%
+                        select(nombre_estacion_origen,
+                               lon=long_estacion_origen,
+                               lat=lat_estacion_origen,
+                               year)%>%
+                        unique()
+
+estaciones_origen_un_geo <- estaciones_origen_un %>% 
+                            select(nombre_estacion_origen,
+                                   lon=lon,
+                                   lat=lat,year)%>%
+                            st_as_sf(coords=c(x="lon",y="lat"), crs=4326)
+
+estaciones_o_resumen <- recorridos_2019_2020 %>% 
+                        group_by(nombre_estacion_origen,year) %>%
+                        summarise(cantidad=n())
+
+estaciones_o_resumen <- left_join(estaciones_origen_un_geo, estaciones_o_resumen, by=c("nombre_estacion_origen","year"))
+
+```
+
+
+```{r}
+
+bbox <- as.numeric(st_bbox(comunas_CABA))
+mapa_caba <- get_stamenmap(bbox = bbox, zoom=12) 
+
+mapa <- ggmap(mapa_caba)+
+            geom_sf(estaciones_o_resumen, mapping=aes(color=cantidad),inherit.aes = FALSE) +
+               labs(title = "Mapa 1.Ubicación de la estaciones de origen de Ecobici",
+               subtitle = "Cantidad de estaciones correspondientes a recorridos de junio de 2019 y 2020",
+               color = "Cantidad",
+               caption = "Fuente: BAData") +
+               scale_color_distiller(palette = "Spectral") +
+               facet_wrap(~year)+ 
+               theme_void() + 
+               theme(plot.title = element_text(face="bold", size=15))
+mapa
+```
+
+Como podemos observar hay menor cantidad de estaciones disponibles en el año 2020. Al mismo tiempo, la cantidad de  veces que se repite ...
+
+
+```{r}
+estaciones_destino_un <- recorridos_2019_2020 %>%
+                        select(nombre_estacion_destino,
+                               lon=long_estacion_destino,
+                               lat=lat_estacion_destino,
+                               year)%>%
+                        unique()
+
+estaciones_destino_un_geo <- estaciones_destino_un %>% 
+                            select(nombre_estacion_destino,
+                                   lon=lon,
+                                   lat=lat,year)%>%
+                            st_as_sf(coords=c(x="lon",y="lat"), crs=4326)
+
+estaciones_d_resumen <- recorridos_2019_2020 %>% 
+                        group_by(nombre_estacion_destino,year) %>%
+                        summarise(cantidad=n())
+
+estaciones_d_resumen <- left_join(estaciones_destino_un_geo, estaciones_d_resumen, by=c("nombre_estacion_destino","year"))
+
+```
+
+
+```{r}
+
+mapa <- ggmap(mapa_caba)+
+            geom_sf(estaciones_d_resumen, mapping=aes(color=cantidad),inherit.aes = FALSE) +
+               labs(title = "Mapa 1.Ubicación de la estaciones de destino de Ecobici",
+               subtitle = "Cantidad de estaciones correspondientes a recorridos de junio de 2019 y 2020",
+               color = "Cantidad",
+               caption = "Fuente: BAData") +
+               scale_color_distiller(palette = "Spectral") +
+               facet_wrap(~year)+ 
+               theme_void() + 
+               theme(plot.title = element_text(face="bold", size=15))
+mapa
+```
+
+Estos mapas nos dan la pauta de que es posible que la gran mayoría de los recorridos que se hacen sean ida y vuelta. 
 
