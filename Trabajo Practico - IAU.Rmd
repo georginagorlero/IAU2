@@ -266,7 +266,7 @@ estaciones_d_resumen <- left_join(estaciones_destino_un_geo, estaciones_d_resume
 
 mapa <- ggmap(mapa_caba)+
             geom_sf(estaciones_d_resumen, mapping=aes(color=cantidad),inherit.aes = FALSE) +
-               labs(title = "Mapa 1.Ubicación de la estaciones de destino de Ecobici",
+               labs(title = "Mapa 2.Ubicación de la estaciones de destino de Ecobici",
                subtitle = "Cantidad de estaciones correspondientes a recorridos de junio de 2019 y 2020",
                color = "Cantidad",
                caption = "Fuente: BAData") +
@@ -278,4 +278,29 @@ mapa
 ```
 
 Estos mapas nos dan la pauta de que es posible que la gran mayoría de los recorridos que se hacen sean ida y vuelta. 
+
+También podemos observar la cantidad de viajes iguales que se realizaron, es decir, de recorridos que tienen mismo origen y destino. 
+
+```{r}
+viajes_resumen <- recorridos_2019_2020 %>%
+                  group_by(id_estacion_origen, id_estacion_destino,nombre_estacion_origen,nombre_estacion_destino,year) %>%
+                  summarise(cantidad=n())
+```
+```{r}
+ggplot() + 
+    geom_tile(data = viajes_resumen, aes(x = id_estacion_origen, y = id_estacion_destino, fill = cantidad)) +
+    scale_fill_distiller(palette = "Spectral") +
+    facet_wrap(~year) +
+    theme_minimal() +
+    theme(plot.title = element_text(face="bold", size=15)) +
+    theme(axis.title.x = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12)) +
+    theme(axis.title.y = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12)) + 
+    scale_fill_continuous(low="navajowhite3", high="darkred", breaks = c(0,200,400,600,800))+
+    labs(title = "Gráfico 1. Viajes por origen y destino de Ecobicis", 
+         subtitle = "Recorridos de la segunda quincena de junio 2019-2020",
+         x = "Estación origen",
+         y = "Estación destino",
+         caption = "fuente: BAData.",
+         fill = "Cantidad")
+```
 
