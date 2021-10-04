@@ -235,7 +235,7 @@ mapa <- ggmap(mapa_caba)+
 mapa
 ```
 
-Como podemos observar hay menor cantidad de estaciones disponibles en el año 2020. Al mismo tiempo, la cantidad de  veces que se repite ...
+Como podemos observar hay menor cantidad de estaciones disponibles en el año 2020. Al mismo tiempo, la cantidad de recorridos en 2020 disminuyó considerablemente.Además se homogeneizo la cantidad de recorridos, mientras en 2019 había sectores de la ciudad como Palermo donde la cantidad de viajes bastante elevada con respecto a otros barrios como Paternal, en 2020 no hay grandes diferencias. La zona en la que más bajaron los viajes fue en el microcentro porteño. 
 
 
 ```{r}
@@ -282,7 +282,7 @@ También podemos observar la cantidad de viajes iguales que se realizaron, es de
 
 ```{r}
 viajes_resumen <- recorridos_2019_2020 %>%
-                  group_by(id_estacion_origen, id_estacion_destino,nombre_estacion_origen,nombre_estacion_destino,year) %>%
+                  group_by(year,id_estacion_origen,nombre_estacion_origen, id_estacion_destino,nombre_estacion_destino) %>%
                   summarise(cantidad=n())
 ```
 ```{r}
@@ -306,32 +306,6 @@ Como se puede ver, la cantidad de viajes en 2020 es muy menor a la cantidad de v
 
 Podemos ver también cuáles fueron los viajes más realizados (el top 10) y su diferencia entre 2019 y 2020. 
 
-
-```{r}
-viajes_top10_2020 <- viajes_resumen %>% 
-                     ungroup() %>%
-                     filter(year=="2020")%>%
-                     top_n(10)
-viajes_top10_2020
-```
-```{r, fig.width=10, fig.height=8}
-top10_2020 <- ggplot() + 
-    geom_tile(data = viajes_top10_2020, aes(x = nombre_estacion_origen, y = nombre_estacion_destino, fill = cantidad)) +
-    scale_fill_distiller(palette = "Spectral") +
-    facet_wrap(~year) +
-    theme_minimal() +
-    theme(plot.title = element_text(face="bold", size=15),
-          axis.title.x = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.title.y = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.text.x = element_text(color = "grey20", size = 10, angle = 90),
-          axis.text.y = element_text(color = "grey20", size = 10, angle = 0)) + 
-    labs(title = "Gráfico 3. Top 10 de viajes por origen y destino de Ecobicis", 
-         subtitle = "Recorridos de la segunda quincena de junio 2020",
-         x = "Estación origen",
-         y = "Estación destino",
-         caption = "fuente: BAData.",
-         fill = "Cantidad")
-top10_2019
-```
-
 ```{r}
 viajes_top10_2019 <- viajes_resumen %>% 
                      ungroup() %>%
@@ -340,11 +314,11 @@ viajes_top10_2019 <- viajes_resumen %>%
 viajes_top10_2019
 
 ```
+
 ```{r, fig.width=10, fig.height=8}
 top10_2019 <- ggplot() + 
     geom_tile(data = viajes_top10_2019, aes(x = nombre_estacion_origen, y = nombre_estacion_destino, fill = cantidad)) +
     scale_fill_distiller(palette = "Spectral") +
-    facet_wrap(~year) +
     theme_minimal() +
     theme(plot.title = element_text(face="bold", size=15),
           axis.title.x = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.title.y = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.text.x = element_text(color = "grey20", size = 10, angle = 90),
@@ -357,5 +331,28 @@ top10_2019 <- ggplot() +
          fill = "Cantidad")
 top10_2019
 ```
-Vemos que los viajes más frecuentes fueron circulares, tanto en 2020 como en 2019, pero cambiaron en gran medida las estaciones. 
 
+```{r}
+viajes_top10_2020 <- viajes_resumen %>% 
+                     ungroup() %>%
+                     filter(year=="2020")%>%
+                     top_n(10)
+viajes_top10_2020
+```
+```{r, fig.width=10, fig.height=8}
+top10_2020 <- ggplot() + 
+    geom_tile(data = viajes_top10_2020, aes(x = nombre_estacion_origen, y = nombre_estacion_destino, fill = cantidad)) +
+    scale_fill_distiller(palette = "Spectral") +
+    theme_minimal() +
+    theme(plot.title = element_text(face="bold", size=15),
+          axis.title.x = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.title.y = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.text.x = element_text(color = "grey20", size = 10, angle = 90),
+          axis.text.y = element_text(color = "grey20", size = 10, angle = 0)) + 
+    labs(title = "Gráfico 3. Top 10 de viajes por origen y destino de Ecobicis", 
+         subtitle = "Recorridos de la segunda quincena de junio 2020",
+         x = "Estación origen",
+         y = "Estación destino",
+         caption = "fuente: BAData.",
+         fill = "Cantidad")
+top10_2020
+```
+Vemos que los viajes más frecuentes fueron circulares, tanto en 2020 como en 2019, pero cambiaron en gran medida las estaciones. En 2019 el viaje más realizado fue el circular de Parque Avellaneda, mientras que en 2020 fue de Plaza Bolivia.
