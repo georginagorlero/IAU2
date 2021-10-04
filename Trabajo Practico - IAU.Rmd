@@ -92,47 +92,87 @@ recorridos_2019$nombre_estacion_destino <- recorridos_2019$nombre_estacion_desti
 recorridos_2019$nombre_estacion_origen <- recorridos_2019$nombre_estacion_origen %>%
   str_to_title() %>% 
   str_replace_all(c("á"="a","é"="e", "í"="i", "ó"="o", "ú"="u"))
+```
 
+```{r}
+#Volvemos a corroborar las estaciones destino e incorporamos las de origen
 
-#Volvemos a corroborar las estaciones destino
 destinos_2019 <- recorridos_2019 %>% 
                  group_by(nombre_estacion_destino) %>% 
-                 summarise(cantidad=n())
+                 summarise(cantidad=n()) %>% 
+                 arrange(desc(cantidad))
 destinos_2019
+
+origen_2019 <- recorridos_2019 %>% 
+                 group_by(nombre_estacion_origen) %>% 
+                 summarise(cantidad=n()) %>% 
+                 arrange(desc(cantidad))
+origen_2019
 ```
 
-Ahora vemos que los datos están más prolijos. Vemos que en junio de 2019 la estación más utilizada como destino de las 385 fue la de Constitución con 4066 recorridos finalizados en sólo la segunda quincena de junio.
+Ahora vemos que los datos están más prolijos. Vemos que en junio de 2019 la estación más utilizada como destino de las 385 fue la de Constitución con 4066 recorridos finalizados en sólo la segunda quincena de junio. Lo mismo sucede con el origen, aunque cambia levemente el top10, Constitución sigue liderando inicio de recorrido.
 
 
 
-
-Para esto primero me quedo sólo con las columnas que me interesan que son aquellas que tienen que ver con el destino de los recorridos. Además, saco todas aquellas observaciones que no tienen latitud (y por ende tampoco longitud)
+Vamos a realizar el mismo procedimiento con los recorridos de junio de 2020
 
 ```{r}
-resumen_destinos2019 <- recorridos_2019_mam %>% 
-                    select(fecha_destino_recorrido, id_estacion_destino, nombre_estacion_destino,direccion_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
-                    filter(!is.na(lat_estacion_destino))
+destinos_2020 <- recorridos_2020 %>% 
+                 group_by(nombre_estacion_destino) %>% 
+                 summarise(cantidad=n())
+destinos_2020
 ```
+
+Como vemos tenemos el mismo inconveniente de minúsculas y mayúsculas así como con los acentos.
 
 ```{r}
-resumen_destinos2020 <- recorridos_2020_mam %>% 
-                    select(fecha_destino_recorrido, nombre_estacion_destino,direccion_estacion_destino,lat_estacion_destino,long_estacion_destino) %>% 
-                    filter(!is.na(lat_estacion_destino))
+recorridos_2020$nombre_estacion_destino <- recorridos_2020$nombre_estacion_destino %>%
+  str_to_title() %>% 
+  str_replace_all(c("á"="a","é"="e", "í"="i", "ó"="o", "ú"="u"))
+
+
+
+recorridos_2020$nombre_estacion_origen <- recorridos_2020$nombre_estacion_origen %>%
+  str_to_title() %>% 
+  str_replace_all(c("á"="a","é"="e", "í"="i", "ó"="o", "ú"="u"))
 ```
+```{r}
+#Volvemos a corroborar las estaciones destino e incorporamos las de origen
+
+destinos_2020 <- recorridos_2020 %>% 
+                 group_by(nombre_estacion_destino) %>% 
+                 summarise(cantidad=n()) %>% 
+                 arrange(desc(cantidad))
+destinos_2020
+
+origen_2020 <- recorridos_2020 %>% 
+                 group_by(nombre_estacion_origen) %>% 
+                 summarise(cantidad=n()) %>% 
+                 arrange(desc(cantidad))
+origen_2020
+```
+
+Con las estaciones de origen y finales corregidas podemos ver que existe una clara diferencia no solo en las cantidades de destinos u orígenes que encontramos en el dataset, sino que también en cuáles fueron las más utilizadas. En 2020 fue la Estación Pacífico la más utilizada.
+
+Algo que notamos con respecto a las bases de 2020 y 2019 es que en una el nombre de la estación incluye el número mientras que en la otra no lo incluye, vamos a normalizarlo. Como ya tenemos una columna que nos da el número de estación, vamos a dejar solamente el nombre.
 
 ```{r}
-destinos_2019 <- resumen_destinos2019 %>%
-              mutate(nombre_estacion_destino = paste(id_estacion_destino,nombre_estacion_destino,sep=" - "))%>%
-              group_by(nombre_estacion_destino) %>%
-              summarize(cantidad=n()) %>%
-              arrange(desc(cantidad))
+
+recorridos_2020 <- recorridos_2020 %>% 
+    mutate(nombre_estacion_destino = str_sub(nombre_estacion_destino,7))%>%
+    mutate(nombre_estacion_origen = str_sub(nombre_estacion_origen,7))
+  
 ```
+
+Ahora que normalizamos los nombres de las estaciones, vamos a unificar nuestras dos bases para tener una sola.
 
 
 ```{r}
-destinos_2020 <- resumen_destinos2020 %>%
-              group_by(nombre_estacion_destino) %>%
-              summarize(cantidad=n()) %>%
-              arrange(desc(cantidad))
-head(destinos_2020)
+
+recorridos_2019_2020 <- rbind(recorridos_2019,recorridos_2020) %>% 
+                        mutate(year=year(fecha_origen_recorrido))
+  
 ```
+
+Ya tenemos nuestra base lista para trabajar. 
+
