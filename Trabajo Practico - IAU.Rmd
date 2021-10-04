@@ -183,8 +183,7 @@ Ya tenemos nuestra base lista para trabajar.
 
 # Instrumentos de Análisis Urbano 2 - Trabajo Práctico n°3
 
-En este trabajo práctico vamos a visualizar los recorridos de Ecobici en la segunda quincena de junio de 2019 y 2020. Trataremos de entender el impacto del Covid-19 en el uso de las bicicletas públicas de la Ciudad.
-
+En este trabajo práctico vamos a visualizar los recorridos de Ecobici en la segunda quincena de junio de 2019 y 2020. Trataremos de entender el impacto del Covid-19 en el uso de las bicicletas públicas de la Ciudad. Para esto vamos a retomar algunos gráficos realizado por Antonio Vazquez Brust y Angie Scetta (en Analítica Urbana, 2020) que nos resultaron interesante pero con los datos que tenemos (y modificaciones personales) para estudiar el caso previo y durante la pandemia.
 
 ```{r}
 
@@ -289,7 +288,6 @@ viajes_resumen <- recorridos_2019_2020 %>%
 ```{r}
 ggplot() + 
     geom_tile(data = viajes_resumen, aes(x = id_estacion_origen, y = id_estacion_destino, fill = cantidad)) +
-    scale_fill_distiller(palette = "Spectral") +
     facet_wrap(~year) +
     theme_minimal() +
     theme(plot.title = element_text(face="bold", size=15)) +
@@ -303,4 +301,61 @@ ggplot() +
          caption = "fuente: BAData.",
          fill = "Cantidad")
 ```
+
+Como se puede ver, la cantidad de viajes en 2020 es muy menor a la cantidad de viajes de 2019. Hay cierto patrón que se mantiene de mayor cantidad de viajes en las estaciones de ID 1 a 150, pero la diferencia en 2020 con el resto de las estaciones se profundizó. También podemos ver que nuestra intuición era correcta, gran parte de los viajes son ida y vuelta (circulares).
+
+Podemos ver también cuáles fueron los viajes más realizados (el top 10) y su diferencia entre 2019 y 2020. 
+
+
+```{r}
+viajes_top10_2020 <- viajes_resumen %>% 
+                     ungroup() %>%
+                     filter(year=="2020")%>%
+                     top_n(10)
+viajes_top10_2020
+```
+```{r, fig.width=10, fig.height=8}
+top10_2020 <- ggplot() + 
+    geom_tile(data = viajes_top10_2020, aes(x = nombre_estacion_origen, y = nombre_estacion_destino, fill = cantidad)) +
+    scale_fill_distiller(palette = "Spectral") +
+    facet_wrap(~year) +
+    theme_minimal() +
+    theme(plot.title = element_text(face="bold", size=15),
+          axis.title.x = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.title.y = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.text.x = element_text(color = "grey20", size = 10, angle = 90),
+          axis.text.y = element_text(color = "grey20", size = 10, angle = 0)) + 
+    labs(title = "Gráfico 3. Top 10 de viajes por origen y destino de Ecobicis", 
+         subtitle = "Recorridos de la segunda quincena de junio 2020",
+         x = "Estación origen",
+         y = "Estación destino",
+         caption = "fuente: BAData.",
+         fill = "Cantidad")
+top10_2019
+```
+
+```{r}
+viajes_top10_2019 <- viajes_resumen %>% 
+                     ungroup() %>%
+                     filter(year=="2019")%>%
+                     top_n(10)
+viajes_top10_2019
+
+```
+```{r, fig.width=10, fig.height=8}
+top10_2019 <- ggplot() + 
+    geom_tile(data = viajes_top10_2019, aes(x = nombre_estacion_origen, y = nombre_estacion_destino, fill = cantidad)) +
+    scale_fill_distiller(palette = "Spectral") +
+    facet_wrap(~year) +
+    theme_minimal() +
+    theme(plot.title = element_text(face="bold", size=15),
+          axis.title.x = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.title.y = element_text(face="bold", vjust=-0.5, colour="firebrick", size=12), axis.text.x = element_text(color = "grey20", size = 10, angle = 90),
+          axis.text.y = element_text(color = "grey20", size = 10, angle = 0)) + 
+    labs(title = "Gráfico 3. Top 10 de viajes por origen y destino de Ecobicis", 
+         subtitle = "Recorridos de la segunda quincena de junio 2019",
+         x = "Estación origen",
+         y = "Estación destino",
+         caption = "fuente: BAData.",
+         fill = "Cantidad")
+top10_2019
+```
+Vemos que los viajes más frecuentes fueron circulares, tanto en 2020 como en 2019, pero cambiaron en gran medida las estaciones. 
 
